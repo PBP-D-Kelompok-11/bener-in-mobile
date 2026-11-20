@@ -44,60 +44,75 @@ Impact. Profil Mitra, hasil pencarian, dan permintaan memakai ID
 ## Scope Checkpoint 1
 
 Setiap modul ditargetkan punya minimal satu halaman yang dapat dibuka lewat
-navigasi Flutter dan endpoint DRF yang berjalan dengan data Django. Submisi
-Checkpoint 1 berupa tautan repositori Flutter di SCELE.
+navigasi Flutter dan endpoint DRF yang berjalan dengan data Django.
+Kumpulkan [tautan repositori Flutter](https://github.com/PBP-D-Kelompok-11/bener-in-mobile)
+ke SCELE untuk Checkpoint 1.
 
 ### Endpoint DRF Checkpoint 1
 
-Endpoint berikut sudah diuji menggunakan server Django lokal. Ketersediaan
-endpoint di PWS mengikuti versi backend yang sudah dideploy ke sana.
+Endpoint berikut sudah diuji menggunakan server Django lokal dengan
+[commit backend Checkpoint 1](https://github.com/PBP-D-Kelompok-11/bener-in/commit/dd2294c842d1286d0bc3194171e1fe014e0b0ddc).
+Ketersediaan API di PWS mengikuti versi backend yang dideploy.
 
 - **A · Autentikasi**
   - `GET /api/v1/auth/csrf/` untuk mengambil token CSRF.
   - `POST /api/v1/auth/login/` untuk memulai sesi.
   - `GET /api/v1/auth/me/` untuk membaca akun yang sedang masuk.
   - `POST /api/v1/auth/logout/` untuk mengakhiri sesi.
-- **B · Permintaan**
-
-    `GET /api/v1/repairs/` mengembalikan permintaan milik Customer atau
+- **B · Permintaan.** `GET /api/v1/repairs/` mengembalikan permintaan milik Customer atau
   permintaan yang ditujukan ke Mitra yang masuk.
-- **C · Profil Mitra**
-
-    `GET /api/v1/mitra/{id}/` mengembalikan detail Mitra aktif.
-- **D · Pencarian lokasi**
-
-    `GET /api/v1/locations/mitra/` mengembalikan mitra terdekat berdasarkan
+- **C · Profil Mitra.** `GET /api/v1/mitra/{id}/` mengembalikan detail Mitra aktif.
+- **D · Pencarian lokasi.** `GET /api/v1/locations/mitra/` mengembalikan mitra terdekat berdasarkan
   `lat` dan `lng`, dengan `radius_km` dan `category` opsional.
-- **E · Impact**
-
-    `GET /api/v1/impact/` mengembalikan progres Customer berdasarkan jumlah
+- **E · Impact.** `GET /api/v1/impact/` mengembalikan progres Customer berdasarkan jumlah
   permintaannya yang berstatus `completed`.
 
 ## Setup dan Instalasi Lokal
+
+### Backend Django
+
+Jalankan perintah berikut dari repo web `bener-in` di PowerShell. Langkah ini
+memasang dependensi, menyiapkan SQLite lokal, dan menjalankan tes API A–E.
+
+```powershell
+python -m venv env
+.\env\Scripts\python.exe -m pip install -r requirements.txt
+$env:PRODUCTION = 'False'
+.\env\Scripts\python.exe manage.py migrate
+.\env\Scripts\python.exe manage.py test mobile_api
+.\env\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+```
+
+Tes memakai database sementara. Untuk demo manual dengan SQLite lokal,
+buat akun Customer dan Mitra lewat halaman registrasi web. Mitra di sekitar
+Depok akan muncul dalam pencarian awal. Data permintaan dan Impact mengikuti
+data yang dibuat pada server tersebut.
+
+### Flutter Android
 
 Setup yang digunakan adalah Flutter stable 3.47.9 dengan Dart 3.13.7.
 Pasang Android SDK Platform 36 dan NDK 28.2.13676358 melalui Android SDK Manager.
 Pastikan `flutter doctor -v` mengenali Android toolchain dan `flutter devices`
 menampilkan emulator atau perangkat Android.
 
+Buka terminal kedua di repo `bener-in-mobile`. Dengan satu perangkat Android
+atau emulator aktif, teruskan port Django melalui ADB:
+
 ```powershell
 flutter pub get
-flutter run
-```
-
-Jalankan Django lokal dari repo web PTS dengan `python manage.py migrate`
-dan `python manage.py runserver`. Dengan satu perangkat Android terhubung
-atau emulator aktif, teruskan port Django melalui ADB dan jalankan Flutter
-dalam mode debug:
-
-```powershell
 & "$env:ANDROID_HOME\platform-tools\adb.exe" reverse tcp:8000 tcp:8000
 flutter run --dart-define=API_BASE_URL=http://127.0.0.1:8000
 ```
 
-Tanpa `API_BASE_URL`, aplikasi memakai alamat PWS web bener.in. Tab Akun
-menggunakan akun Django yang sudah ada. Pencarian awal memakai titik
-sekitar Depok, lalu hasil pencarian dapat dibuka di tab Mitra.
+Jalankan `flutter run` tanpa `API_BASE_URL` untuk memakai alamat PWS web
+bener.in. Setelah deploy, cek endpoint CSRF dan pencarian Mitra di PWS
+sebelum mencoba login dari aplikasi:
+
+```powershell
+$pws = 'https://hisyam-prasetyo-benerin.pws.cs.ui.ac.id'
+Invoke-RestMethod "$pws/api/v1/auth/csrf/"
+Invoke-RestMethod "$pws/api/v1/locations/mitra/?lat=-6.36&lng=106.83"
+```
 
 ## Menjalankan Testing
 
