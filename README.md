@@ -47,10 +47,10 @@ Setiap modul ditargetkan punya minimal satu halaman yang dapat dibuka lewat
 navigasi Flutter dan endpoint DRF yang berjalan dengan data Django. Submisi
 Checkpoint 1 berupa tautan repositori Flutter di SCELE.
 
-### Rencana Endpoint DRF
+### Endpoint DRF Checkpoint 1
 
-Endpoint di bawah adalah usulan kontrak yang akan diverifikasi sebelum
-pengumpulan.
+Endpoint berikut sudah diuji menggunakan server Django lokal. Ketersediaan
+endpoint di PWS mengikuti versi backend yang sudah dideploy ke sana.
 
 - **A · Autentikasi**
   - `GET /api/v1/auth/csrf/` untuk mengambil token CSRF.
@@ -84,6 +84,20 @@ menampilkan emulator atau perangkat Android.
 flutter pub get
 flutter run
 ```
+
+Jalankan Django lokal dari repo web PTS dengan `python manage.py migrate`
+dan `python manage.py runserver`. Dengan satu perangkat Android terhubung
+atau emulator aktif, teruskan port Django melalui ADB dan jalankan Flutter
+dalam mode debug:
+
+```powershell
+& "$env:ANDROID_HOME\platform-tools\adb.exe" reverse tcp:8000 tcp:8000
+flutter run --dart-define=API_BASE_URL=http://127.0.0.1:8000
+```
+
+Tanpa `API_BASE_URL`, aplikasi memakai alamat PWS web bener.in. Tab Akun
+menggunakan akun Django yang sudah ada. Pencarian awal memakai titik
+sekitar Depok, lalu hasil pencarian dapat dibuka di tab Mitra.
 
 ## Menjalankan Testing
 
